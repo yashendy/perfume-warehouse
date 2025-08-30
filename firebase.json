@@ -1,87 +1,19 @@
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-
-    function hasRole(role) {
-      return request.auth != null && request.auth.token.role == role;
-    }
-    function isManager() { return hasRole("manager"); }
-    function isStorekeeper() { return hasRole("storekeeper"); }
-    function isRep() { return hasRole("rep"); }
-
-    match /users/{uid} {
-      allow read: if isManager() || (isRep() && request.auth.uid == uid) || isStorekeeper();
-      allow write: if isManager() && request.resource.data.role in ["manager","storekeeper","rep"];
-    }
-
-    match /products/{id} {
-      allow read: if request.auth != null;
-      allow write: if isManager() || isStorekeeper();
-    }
-
-    match /bulk_lots/{id} {
-      allow read: if request.auth != null;
-      allow create, update: if isManager() || isStorekeeper();
-      allow delete: if isManager();
-    }
-
-    match /decant_jobs/{id} {
-      allow read: if request.auth != null;
-      allow create, update: if isManager() || isStorekeeper();
-      allow delete: if isManager();
-    }
-
-    match /items/{id} {
-      allow read: if request.auth != null;
-      allow create, update: if isManager() || isStorekeeper();
-      allow delete: if isManager();
-    }
-
-    match /warehouse_stock/{id} {
-      allow read: if request.auth != null;
-      allow write: if isManager() || isStorekeeper();
-    }
-
-    match /dispatch_orders/{id} {
-      allow read: if isManager() || isStorekeeper() || (isRep() && resource.data.rep_id == request.auth.uid);
-      allow create: if isManager() || isStorekeeper();
-      allow update: if isManager() || isStorekeeper();
-      allow delete: if isManager();
-    }
-
-    match /rep_ledgers/{id} {
-      allow read: if isManager() || isStorekeeper() ||
-        (isRep() && resource.data.rep_id == request.auth.uid);
-      allow write: if false; // تُدار عبر Functions فقط
-    }
-
-    match /daily_settlements/{id} {
-      allow read: if isManager() || isStorekeeper() ||
-        (isRep() && resource.data.rep_id == request.auth.uid);
-      allow create: if isRep() && request.auth.uid == request.resource.data.rep_id;
-      allow update: if (isRep() && request.auth.uid == resource.data.rep_id && resource.data.status in ["draft","submitted"])
-                     || isManager();
-      allow delete: if isManager();
-    }
-
-    match /monthly_summaries/{month} {
-      allow read: if request.auth != null;
-      allow write: if isManager(); // قفل/فتح فقط، باقي التجميع عبر Functions
-    }
-
-    match /stock_snapshots/{month}/{coll}/{doc} {
-      allow read: if request.auth != null;
-      allow write: if false; // Functions فقط
-    }
-
-    match /ai_recommendations/{month}/{docid} {
-      allow read: if request.auth != null;
-      allow write: if isManager(); // للسماح بالتصحيح اليدوي لو لزم
-    }
-
-    match /audit_logs/{id} {
-      allow read: if isManager();
-      allow write: if false; // Functions فقط
-    }
-  }
+{
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs20"
+  },
+  "hosting": {
+    "public": "web",
+    "ignore": ["**/.*", "**/node_modules/**"],
+    "rewrites": [{ "source": "**", "destination": "/index.html" }],
+    "headers": [
+      {
+        "source": "/sw.js",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      }
+    ]
+  },
+  "firestore": { "rules": "firestore.rules", "indexes": "firestore.indexes.json" },
+  "storage": { "rules": "storage.rules" }
 }
