@@ -1,0 +1,11 @@
+{
+  "name": "مستودع عطور",
+  "short_name": "عطور",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#111111",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": []
+}
