@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>مستودع عطور</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#111" />
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>مستودع العطور</h1>
+    <nav id="nav"></nav>
+  </header>
+
+  <main id="app">
+    <!-- يُحقن من router -->
+  </main>
+
+  <footer class="foot">© <span id="year"></span> Perfume Warehouse</footer>
+
+  <!-- Firebase SDK (ESM) -->
+  <script type="module" src="/firebase.js"></script>
+  <script type="module" src="/auth.js"></script>
+  <script type="module" src="/ui/components.js"></script>
+  <script type="module" src="/ui/scanner.js"></script>
+  <script type="module" src="/router.js"></script>
+  <script type="module" src="/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js');
+    }
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
